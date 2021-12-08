@@ -28,6 +28,4 @@ public class CameraLerpToTransform : MonoBehaviour
             Debug.LogError("Camera target not assigned!");
         }
     }
-
-
 }
