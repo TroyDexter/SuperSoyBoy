@@ -12,6 +12,9 @@ public class SoyBoyController : MonoBehaviour
     public float jumpDurationThreshold = 0.25f;
     public float airAccel = 3f;
     public float jump = 14f;
+    public AudioClip runClip;
+    public AudioClip jumpClip;
+    public AudioClip slideClip;
 
     private Vector2 input;
     private SpriteRenderer sr;
@@ -21,12 +24,14 @@ public class SoyBoyController : MonoBehaviour
     private float width;
     private float height;
     private float jumpDuration;
+    private AudioSource audioSource;
 
     void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        audioSource = GetComponent<AudioSource>();
 
         width = GetComponent<Collider2D>().bounds.extents.x + 0.1f;
         height = GetComponent<Collider2D>().bounds.extents.y + 0.2f;
@@ -35,6 +40,14 @@ public class SoyBoyController : MonoBehaviour
     void Start()
     {
         
+    }
+
+    void PlayAudioClip(AudioClip clip) 
+    {
+        if (audioSource != null && clip != null) 
+        {
+            if (!audioSource.isPlaying) audioSource.PlayOneShot(clip);
+        }
     }
 
     public bool PlayerIsOnGround()
@@ -131,15 +144,18 @@ public class SoyBoyController : MonoBehaviour
         }
 
 
-        if (PlayerIsOnGround() && isJumping == false)
+        if (PlayerIsOnGround() && !isJumping) 
         {
-            //performs an inner check to see if there is any input for jumping from the controls
-            if (input.y > 0f)
+            if (input.y > 0f) 
             {
                 isJumping = true;
+                PlayAudioClip(jumpClip);
             }
-
             animator.SetBool("IsOnWall", false);
+            if (input.x < 0f || input.x > 0f) 
+            {
+                PlayAudioClip(runClip);
+            } 
         }
 
         //If the jump button is held in longer than 0.25 seconds, then the jump is effectively cancelled, meaning the player can only jump up to a certain height.
@@ -188,6 +204,7 @@ public class SoyBoyController : MonoBehaviour
             rb.velocity = new Vector2(-GetWallDirection() * speed * 0.75f, rb.velocity.y);
             animator.SetBool("IsOnWall", false);
             animator.SetBool("IsJumping", true);
+            PlayAudioClip(jumpClip);
         } 
         else if (!IsWallToLeftOrRight()) 
         {
@@ -197,12 +214,7 @@ public class SoyBoyController : MonoBehaviour
         if (IsWallToLeftOrRight() && !PlayerIsOnGround()) 
         {
             animator.SetBool("IsOnWall", true);
-        }
-
-        // gives the Rigidbody a new velocity if the user has pressed the jump button for less than the jumpDurationThreshold. 
-        if (isJumping && jumpDuration < jumpDurationThreshold)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
+            PlayAudioClip(slideClip);
         }
     }
 }
