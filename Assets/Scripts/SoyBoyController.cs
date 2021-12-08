@@ -216,5 +216,10 @@ public class SoyBoyController : MonoBehaviour
             animator.SetBool("IsOnWall", true);
             PlayAudioClip(slideClip);
         }
+
+        if (isJumping && jumpDuration < jumpDurationThreshold)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
+        }
     }
 }
