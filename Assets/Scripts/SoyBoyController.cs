@@ -108,6 +108,8 @@ public class SoyBoyController : MonoBehaviour
         input.x = Input.GetAxis("Horizontal");
         input.y = Input.GetAxis("Jump");
 
+        animator.SetFloat("Speed", Mathf.Abs(input.x));
+
         if (input.x > 0f)
         {
             sr.flipX = false;
@@ -117,15 +119,17 @@ public class SoyBoyController : MonoBehaviour
             sr.flipX = true;
         }
 
-        if (input.y >= 1f)
-        {
+        if (input.y >= 1f) {
             jumpDuration += Time.deltaTime;
-        }
+            animator.SetBool("IsJumping", true);
+        } 
         else
         {
             isJumping = false;
+            animator.SetBool("IsJumping", false);
             jumpDuration = 0f;
         }
+
 
         if (PlayerIsOnGround() && isJumping == false)
         {
@@ -134,6 +138,8 @@ public class SoyBoyController : MonoBehaviour
             {
                 isJumping = true;
             }
+
+            animator.SetBool("IsOnWall", false);
         }
 
         //If the jump button is held in longer than 0.25 seconds, then the jump is effectively cancelled, meaning the player can only jump up to a certain height.
@@ -180,6 +186,17 @@ public class SoyBoyController : MonoBehaviour
         if (IsWallToLeftOrRight() && !PlayerIsOnGround() && input.y == 1) 
         {
             rb.velocity = new Vector2(-GetWallDirection() * speed * 0.75f, rb.velocity.y);
+            animator.SetBool("IsOnWall", false);
+            animator.SetBool("IsJumping", true);
+        } 
+        else if (!IsWallToLeftOrRight()) 
+        {
+            animator.SetBool("IsOnWall", false);
+            animator.SetBool("IsJumping", true);
+        }
+        if (IsWallToLeftOrRight() && !PlayerIsOnGround()) 
+        {
+            animator.SetBool("IsOnWall", true);
         }
 
         // gives the Rigidbody a new velocity if the user has pressed the jump button for less than the jumpDurationThreshold. 
